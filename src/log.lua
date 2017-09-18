@@ -1,10 +1,19 @@
-local function push_logs(premature, uri, req_body, res_body, res_done)
-  local redis = require "resty.redis"
+local random = require("resty.random")
+local restystring = require("resty.string")
+local redis = require("resty.redis")
+
+local function new_req()
+  local bytes = random.bytes(8)
+  local hexbytes = restystring.to_hex(bytes)
+  return hexbytes
+end
+
+local function push_logs(premature, req_id, uri, req_body, res_body, res_done)
   local red = redis:new()
 
   red:set_timeout(1000) -- 1 sec
   red:connect("127.0.0.1", 6379)
-  red:xadd("aaa", "*", "uri", tostring(uri), "req_body", tostring(req_body), "res_body", res_body, "res_done", tostring(res_done))
+  red:xadd("reqs", "*", "id", req_id, "uri", tostring(uri), "req_body", tostring(req_body), "res_body", res_body, "res_done", tostring(res_done))
     
 end
 if ngx.var.uri == "/api/public-offers" then
