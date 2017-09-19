@@ -15,6 +15,9 @@ local function push_logs(premature, req_id, uri, req_body, res_body, res_done)
 
   red:set_timeout(1000) -- 1 sec
   red:connect("127.0.0.1", 6379)
+  if red:xlen("reqs") > 9000 then
+    red:del("reqs")
+  end
   red:xadd("reqs", "*", "id", req_id, "uri", tostring(uri), 
            "req_body", tostring(req_body), "res_body", res_body,
 	   "res_done", tostring(res_done))
