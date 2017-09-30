@@ -10,17 +10,31 @@ end
 
 print(new_id())
 
+function is_blacklisted(red, uri)
+  local blocked_urls = red:lrange("urlblacklist", 0, -1)
+  if blocked_urls then
+    for i = 1, #blocked_urls do
+      if uri == blocked_urls[i] then
+        return true
+      end
+    end
+  end
+  return false
+end
+
 local function push_logs(premature, req_id, uri, req_body, res_body, res_done)
   local red = redis:new()
-
   red:set_timeout(1000) -- 1 sec
   red:connect("127.0.0.1", 6379)
-  if red:xlen("reqs") > 9000 then
-    red:del("reqs")
+  if is_blacklisted(red, uri) then
+    return
   end
-  red:xadd("reqs", "*", "id", req_id, "uri", tostring(uri), 
-           "req_body", tostring(req_body), "res_body", res_body,
-	   "res_done", tostring(res_done))
+  
+  red:xadd("reqs", "maxlen", 9000, "*",
+           "uri", uri,
+           "req_body", req_body,
+           "res_body", res_body,
+           "res_done", res_done)
     
 end
 
