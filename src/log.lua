@@ -10,7 +10,23 @@ end
 
 print(new_id())
 
-function is_blacklisted(red, uri)
+local function scan_logs(red)
+  local ptr = "0"
+  while true do
+    local req_block = red:xrange("reqs", ptr, "+", "count", 100)
+    if #req_block == 0 then
+      break
+    end
+    for i = 1, #req_block do
+      ptr = req_block[i][1]
+      local this_req = req_block[i][2].uri
+      print(this_req)
+    end
+  end
+end
+
+
+local function is_blacklisted(red, uri)
   local blocked_urls = red:lrange("urlblacklist", 0, -1)
   if blocked_urls then
     for i = 1, #blocked_urls do
