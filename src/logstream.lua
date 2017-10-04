@@ -72,9 +72,9 @@ local function reqs_for_route(route)
   end
 end
 
-local function fetch_request (red, stream_id, req_id)
+local function fetch_request (red, stream_id)
   local ptr = stream_id
-	local uri, req
+	local uri, req, req_id
 	local res = ""
   local req_block = red:xrange("reqs", ptr, "+", "count", 10)
   local chunks = {}
@@ -82,6 +82,7 @@ local function fetch_request (red, stream_id, req_id)
     ptr = req_block[i][1]
     local this_req = req_block[i][2]
 		local item = get_summary(this_req)
+    req_id = item.id
     local counter = tonumber(item.counter)
     ngx.log(ngx.ERR, "item.id " .. tostring(item.id) .. " req_id " .. tostring(req_id))
     if item.id == req_id then
